@@ -61,6 +61,12 @@ class Hexblade(Character):
             self.crit_range = 1
             self.options.pop("curse", None)
 
+    def hexed(self, on=True):
+        if on:
+            self.options["hexed"] = True
+        else:
+            self.options.pop("hexed", None)
+
     def hexed_damage(self, crit=False):
         if crit:
             return randint(1, 6) + randint(1, 6)
@@ -78,7 +84,7 @@ class Hexblade(Character):
 
         return damage
 
-    def eldritch_blast(self, ac, hexed=False):
+    def eldritch_blast(self, ac):
 
         # add blasts at level 5, 11, 17
         blasts = 1
@@ -95,12 +101,12 @@ class Hexblade(Character):
 
             if self.is_crit(attack_roll):
                 damage += self.eldritch_blast_damage(crit=True)
-                if hexed:
+                if self.options.get("hexed", False):
                     damage += self.hexed_damage(crit=True)
 
             elif attack_roll >= ac:
                 damage += self.eldritch_blast_damage(ac)
-                if hexed:
+                if self.options.get("hexed", False):
                     damage += self.hexed_damage()
         return damage
 
@@ -130,6 +136,12 @@ class Hexblade(Character):
         if self.options.get("curse", False):
             damage += self.proficiency
 
+        if self.options.get("hexed", False):
+            if self.is_crit(roll):
+                damage += self.hexed_damage(crit=True)
+            else:
+                damage += self.hexed_damage()
+
         return damage
 
 
@@ -141,13 +153,15 @@ def attack(
         hexblade.hex_curse()
     if darkness:
         hexblade.advantage = 2
+    if hexed:
+        hexblade.hexed()
 
     damage = 0
     for attack in range(100_000):
         if spiritual_weapon:
             damage += hexblade.spiritual_weapon_damage(ac)
         if hexed:
-            damage += hexblade.eldritch_blast(ac, hexed=True)
+            damage += hexblade.eldritch_blast(ac)
         else:
             damage += hexblade.eldritch_blast(ac)
     return damage / 100_000
