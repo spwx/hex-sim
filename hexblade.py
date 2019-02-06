@@ -73,11 +73,9 @@ class Hexblade(Character):
         return randint(1, 6)
 
     def eldritch_blast_damage(self, crit=False):
-        damage = 0
+        damage = randint(1, 10) + self.stat_bonus
         if crit:
-            damage = randint(1, 10) + randint(1, 10) + self.stat_bonus
-        elif attack_roll >= ac:
-            damage = randint(1, 10) + self.stat_bonus
+            damage += randint(1, 10)
 
         if self.options.get("curse", False):
             damage += self.proficiency
@@ -87,13 +85,14 @@ class Hexblade(Character):
     def eldritch_blast(self, ac):
 
         # add blasts at level 5, 11, 17
-        blasts = 1
-        if self.level >= 5:
-            blasts = 2
+        if self.level >= 17:
+            blasts = 4
         elif self.level >= 11:
             blasts = 3
-        elif self.level >= 17:
-            blasts = 4
+        elif self.level >= 5:
+            blasts = 2
+        else:
+            blasts = 1
 
         damage = 0
         for blast in range(blasts):
@@ -146,7 +145,7 @@ class Hexblade(Character):
 
 
 def attack(
-    level, ac, hexed=False, darkness=False, cursed=False, spiritual_weapon=False
+        level, ac, hexed=False, darkness=False, cursed=False, spiritual_weapon=False
 ):
     hexblade = Hexblade(level)
     if cursed:
@@ -167,31 +166,33 @@ def attack(
     return damage / 100_000
 
 
-levels = [3, 5, 9, 13, 17]
+def run_trials():
+    levels = [3, 5, 9, 13, 17]
+    for level in levels:
+        print(f"level: {level}")
 
-for level in levels:
-    print(f"level: {level}")
+        damage = attack(level, 14, hexed=True)
+        print(f"\thexed: {damage}")
 
-    damage = attack(level, 14, hexed=True)
-    print(f"\thexed: {damage}")
+        damage = attack(level, 14, darkness=True)
+        print(f"\tdarkness: {damage}")
 
-    damage = attack(level, 14, darkness=True)
-    print(f"\tdarkness: {damage}")
+        damage = attack(level, 14, hexed=True, cursed=True)
+        print(f"\thexed, with curse: {damage}")
 
-    damage = attack(level, 14, hexed=True, cursed=True)
-    print(f"\thexed, with curse: {damage}")
+        damage = attack(level, 14, darkness=True, cursed=True)
+        print(f"\tdarkness, with curse: {damage}")
 
-    damage = attack(level, 14, darkness=True, cursed=True)
-    print(f"\tdarkness, with curse: {damage}")
+        damage = attack(level, 14, darkness=True, cursed=True, spiritual_weapon=True)
+        print(f"\tcurse, darkness, spiritual weapon: {damage}")
 
-    damage = attack(level, 14, darkness=True, cursed=True, spiritual_weapon=True)
-    print(f"\tcurse, darkness, spiritual weapon: {damage}")
+        damage = attack(level, 14, hexed=True, cursed=True, spiritual_weapon=True)
+        print(f"\thexed, curse, spiritual weapon: {damage}")
 
-    damage = attack(level, 14, hexed=True, cursed=True, spiritual_weapon=True)
-    print(f"\thexed, curse, spiritual weapon: {damage}")
+        if level >= 17:
+            damage = attack(level, 14, darkness=True, hexed=True, cursed=True)
+            print(f"\thex, foresight, curse: {damage}")
 
-    if level >= 17:
-        damage = attack(level, 14, darkness=True, hexed=True, cursed=True)
-        print(f"\thex, foresight, curse: {damage}")
+        print("")
 
-    print("")
+# TODO stat bonus should increase at different levels for a Hexblade and a Sorlock

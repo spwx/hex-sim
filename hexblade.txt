@@ -1,0 +1,41 @@
+level: 3
+	hexed: 11.70399
+	darkness: 13.11848
+	hexed, with curse: 13.1328
+	darkness, with curse: 14.97149
+	curse, darkness, spiritual weapon: 14.97932
+	hexed, curse, spiritual weapon: 13.08801
+
+level: 5
+	hexed: 29.01989
+	darkness: 29.1741
+	hexed, with curse: 33.67196
+	darkness, with curse: 34.99562
+	curse, darkness, spiritual weapon: 50.15866
+	hexed, curse, spiritual weapon: 43.98085
+
+level: 9
+	hexed: 35.02405
+	darkness: 31.75496
+	hexed, with curse: 41.82165
+	darkness, with curse: 39.66553
+	curse, darkness, spiritual weapon: 57.31849
+	hexed, curse, spiritual weapon: 55.32492
+
+level: 13
+	hexed: 37.35457
+	darkness: 31.90724
+	hexed, with curse: 46.26676
+	darkness, with curse: 41.85193
+	curse, darkness, spiritual weapon: 69.40522
+	hexed, curse, spiritual weapon: 68.2356
+
+level: 17
+	hexed: 39.72393
+	darkness: 31.95357
+	hexed, with curse: 50.76752
+	darkness, with curse: 43.93406
+	curse, darkness, spiritual weapon: 72.67774
+	hexed, curse, spiritual weapon: 75.13206
+	hex, foresight, curse: 57.75199
+
