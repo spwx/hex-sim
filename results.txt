@@ -1,0 +1,78 @@
+level: 3
+	hexed: 8.13448
+	darkness: 9.44796
+
+	hexed, hexblade's curse: 9.75312
+	darkness, hexblade's curse: 11.94617
+
+	hexed, spiritual weapon: 8.07538
+	darkness, spiritual weapon: 9.45196
+
+	hexed, hexblade's curse, spiritual weapon: 9.80046
+	darkness, hexblade's curse, spiritual weapon: 11.97462
+
+level: 5
+	hexed: 13.96766
+	darkness: 20.85296
+
+	hexed, hexblade's curse: 17.52398
+	darkness, hexblade's curse: 27.80453
+
+	hexed, spiritual weapon: 23.18224
+	darkness, spiritual weapon: 30.33745
+
+	hexed, hexblade's curse, spiritual weapon: 29.21317
+	darkness, hexblade's curse, spiritual weapon: 40.73471
+
+level: 9
+	hexed: 19.29194
+	darkness: 23.60292
+
+	hexed, hexblade's curse: 25.16482
+	darkness, hexblade's curse: 32.77072
+
+	hexed, spiritual weapon: 30.60176
+	darkness, spiritual weapon: 34.23103
+
+	hexed, hexblade's curse, spiritual weapon: 39.86649
+	darkness, hexblade's curse, spiritual weapon: 47.89983
+
+	hexed, hexblade's curse, bestow curse: 32.02471
+	darkness, hexblade's curse, bestow curse: 45.0514
+
+level: 13
+	hexed: 27.7282
+	darkness: 35.60377
+
+	hexed, hexblade's curse: 37.87101
+	darkness, hexblade's curse: 52.38623
+
+	hexed, spiritual weapon: 43.75516
+	darkness, spiritual weapon: 52.00214
+
+	hexed, hexblade's curse, spiritual weapon: 58.98841
+	darkness, hexblade's curse, spiritual weapon: 74.81649
+
+	hexed, hexblade's curse, bestow curse: 47.53525
+	darkness, hexblade's curse, bestow curse: 70.94756
+
+level: 17
+	hexed: 39.29692
+	darkness: 47.77341
+
+	hexed, hexblade's curse: 56.57622
+	darkness, hexblade's curse: 74.20006
+
+	hexed, spiritual weapon: 56.22957
+	darkness, spiritual weapon: 64.19112
+
+	hexed, hexblade's curse, spiritual weapon: 79.49875
+	darkness, hexblade's curse, spiritual weapon: 97.63386
+
+	hexed, hexblade's curse, bestow curse: 70.46187
+	darkness, hexblade's curse, bestow curse: 99.08215
+
+	hex, foresight: 65.47196
+	hex, foresight, hexblade's curse: 93.54135
+	hex, foresight, hexblade's curse, bestow curse: 118.41538
+

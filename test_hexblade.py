@@ -33,54 +33,39 @@ def test_eldritch_blast_damage(randint_mock):
     assert hexblade.eldritch_blast_damage() == 5 + 3  # 8
     # test crit damage
     assert hexblade.eldritch_blast_damage(crit=True) == 5 + 5 + 3  # 13
-    # test damage with hex curse applied to target
-    hexblade.hex_curse()
-    assert hexblade.eldritch_blast_damage() == 5 + 3 + 2  # 10
 
 
 def test_eldritch_blast_misses():
     hexblade = Hexblade(1)
-    hexblade.attack_roll = MagicMock(return_value=1)
+    hexblade.attack_roll = MagicMock(return_value=(1, False))
     assert hexblade.eldritch_blast(2) == 0
 
 
-def test_eldritch_blast_hits():
+@patch("hexblade.randint")
+def test_eldritch_blast_hits(randint_mock):
     hexblade = Hexblade(1)
-    hexblade.attack_roll = MagicMock(return_value=15)
-    hexblade.eldritch_blast_damage = MagicMock(return_value=5)
-    assert hexblade.eldritch_blast(15) == 5
+    hexblade.attack_roll = MagicMock(return_value=(15, False))
+    randint_mock.return_value = 5
+    # roll + stat bonus
+    assert hexblade.eldritch_blast(15) == 5 + 3
 
 
-def test_eldritch_blast_hits_with_hex():
+@patch("hexblade.randint")
+def test_eldritch_blast_crits(randint_mock):
     hexblade = Hexblade(1)
-    hexblade.attack_roll = MagicMock(return_value=15)
-    hexblade.eldritch_blast_damage = MagicMock(return_value=5)
-    hexblade.hexed_damage = MagicMock(return_value=4)
-    hexblade.hexed()
-    assert hexblade.eldritch_blast(15) == 9
+    randint_mock.return_value = 5
+    hexblade.attack_roll = MagicMock(return_value=(20, True))
+    # damage dice (5 + 5) + stat bonus (3)
+    assert hexblade.eldritch_blast(15) == 13
 
 
-def test_eldritch_blast_crits():
-    hexblade = Hexblade(1)
-    hexblade.attack_roll = MagicMock(return_value=20)
-    hexblade.eldritch_blast_damage = MagicMock(return_value=5)
-    assert hexblade.eldritch_blast(15) == 5
-
-
-def test_eldritch_blast_crits_with_hex():
-    hexblade = Hexblade(1)
-    hexblade.attack_roll = MagicMock(return_value=15)
-    hexblade.eldritch_blast_damage = MagicMock(return_value=5)
-    hexblade.hexed_damage = MagicMock(return_value=4)
-    hexblade.hexed()
-    assert hexblade.eldritch_blast(15) == 9
-
-
-def test_eldritch_blast_level_17():
+@patch("hexblade.randint")
+def test_eldritch_blast_level_17(randint_mock):
     hexblade = Hexblade(17)
-    hexblade.attack_roll = MagicMock(return_value=15)
-    hexblade.eldritch_blast_damage = MagicMock(return_value=5)
-    assert hexblade.eldritch_blast(15) == 20
+    hexblade.attack_roll = MagicMock(return_value=(15, False))
+    randint_mock.return_value = 5
+    # damage dice x4 (5, 5, 5, 5) + stat bonus x4 (5, 5, 5, 5)
+    assert hexblade.eldritch_blast(15) == 40
 
 
 def test_spiritual_weapon_level_1():
@@ -92,7 +77,7 @@ def test_spiritual_weapon_level_1():
 def test_spiritual_weapon_level_5(randint_mock):
     randint_mock.return_value = 5
     hexblade = Hexblade(5)
-    hexblade.attack_roll = MagicMock(return_value=15)
+    hexblade.attack_roll = MagicMock(return_value=(15, False))
     assert hexblade.spiritual_weapon(14) == 5 + 4  # 9
 
 
@@ -100,7 +85,7 @@ def test_spiritual_weapon_level_5(randint_mock):
 def test_spiritual_weapon_level_10(randint_mock):
     randint_mock.return_value = 5
     hexblade = Hexblade(10)
-    hexblade.attack_roll = MagicMock(return_value=15)
+    hexblade.attack_roll = MagicMock(return_value=(15, False))
     assert hexblade.spiritual_weapon(14) == 5 + 5 + 5  # 14
 
 
@@ -108,7 +93,7 @@ def test_spiritual_weapon_level_10(randint_mock):
 def test_spiritual_weapon_level_5_crit(randint_mock):
     randint_mock.return_value = 5
     hexblade = Hexblade(5)
-    hexblade.attack_roll = MagicMock(return_value=20)
+    hexblade.attack_roll = MagicMock(return_value=(20, True))
     assert hexblade.spiritual_weapon(14) == 5 + 5 + 4  # 14
 
 
@@ -116,7 +101,7 @@ def test_spiritual_weapon_level_5_crit(randint_mock):
 def test_spiritual_weapon_level_10_crit(randint_mock):
     randint_mock.return_value = 5
     hexblade = Hexblade(10)
-    hexblade.attack_roll = MagicMock(return_value=20)
+    hexblade.attack_roll = MagicMock(return_value=(20, True))
     assert hexblade.spiritual_weapon(14) == 5 + 5 + 5 + 5 + 5  # 25
 
 
@@ -125,7 +110,7 @@ def test_spiritual_weapon_level_10_with_curse(randint_mock):
     randint_mock.return_value = 5
     hexblade = Hexblade(10)
     hexblade.hex_curse()
-    hexblade.attack_roll = MagicMock(return_value=20)
+    hexblade.attack_roll = MagicMock(return_value=(20, True))
     # 4d8 damage die + prof + spell ability modifier
     assert hexblade.spiritual_weapon(14) == 5 + 5 + 5 + 5 + 5 + 4  # 29
 
@@ -135,5 +120,5 @@ def test_spiritual_weapon_level_10_with_hex(randint_mock):
     randint_mock.return_value = 5
     hexblade = Hexblade(10)
     hexblade.hexed()
-    hexblade.attack_roll = MagicMock(return_value=15)
+    hexblade.attack_roll = MagicMock(return_value=(15, False))
     assert hexblade.spiritual_weapon(14) == 5 + 5 + 5 + 5  # 25

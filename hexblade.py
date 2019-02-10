@@ -27,7 +27,7 @@ class Character:
         else:
             self.stat_bonus = 3
 
-    def attack_roll(self, add_proficiency=True):
+    def attack_roll(self, proficient=True):
         if self.advantage == 1:
             roll = max(randint(1, 20), randint(1, 20))
         elif self.advantage == 2:
@@ -35,15 +35,17 @@ class Character:
         else:
             roll = randint(1, 20)
 
-        if add_proficiency:
-            return roll + self.proficiency + self.stat_bonus
-        else:
-            return roll
-
-    def is_crit(self, roll):
+        # was the roll a crit?
         if roll >= 20 - self.crit_range:
-            return True
-        return False
+            crit = True
+        else:
+            crit = False
+
+        # add proficiency and the stat bonus
+        if proficient:
+            roll += self.proficiency + self.stat_bonus
+
+        return roll, crit
 
     def is_hit(self, roll, ac):
         if roll >= ac:
@@ -53,6 +55,16 @@ class Character:
 
 
 class Hexblade(Character):
+    def additional_damage_on_hit(self, crit=False):
+        damage = 0
+        if self.options.get("hexed", False):
+            damage += self.hexed_damage(crit=crit)
+        if self.options.get("bestow_curse", False):
+            damage += self.bestow_curse_damage(crit=crit)
+        if self.options.get("curse", False):
+            damage += self.proficiency
+        return damage
+
     def hex_curse(self, on=True):
         if on:
             self.crit_range = 2
@@ -72,13 +84,21 @@ class Hexblade(Character):
             return randint(1, 6) + randint(1, 6)
         return randint(1, 6)
 
+    def bestow_curse(self, on=True):
+        if on:
+            self.options["bestow_curse"] = True
+        else:
+            self.options.pop("bestow_curse", None)
+
+    def bestow_curse_damage(self, crit=False):
+        if crit:
+            return randint(1, 8) + randint(1, 8)
+        return randint(1, 8)
+
     def eldritch_blast_damage(self, crit=False):
         damage = randint(1, 10) + self.stat_bonus
         if crit:
             damage += randint(1, 10)
-
-        if self.options.get("curse", False):
-            damage += self.proficiency
 
         return damage
 
@@ -96,17 +116,17 @@ class Hexblade(Character):
 
         damage = 0
         for blast in range(blasts):
-            attack_roll = self.attack_roll()
+            attack_roll, is_crit = self.attack_roll()
 
-            if self.is_crit(attack_roll):
-                damage += self.eldritch_blast_damage(crit=True)
-                if self.options.get("hexed", False):
-                    damage += self.hexed_damage(crit=True)
+            if attack_roll < ac and not is_crit:
+                return 0
+            else:
+                damage += randint(1, 10) + self.stat_bonus
+                if is_crit:
+                    damage += randint(1, 10)
 
-            elif attack_roll >= ac:
-                damage += self.eldritch_blast_damage(ac)
-                if self.options.get("hexed", False):
-                    damage += self.hexed_damage()
+                damage += self.additional_damage_on_hit(crit=is_crit)
+
         return damage
 
     def spiritual_weapon(self, ac):
@@ -117,58 +137,48 @@ class Hexblade(Character):
         else:
             return 0
 
-        roll = self.attack_roll()
+        attack_roll, is_crit = self.attack_roll()
 
-        if roll < ac:
+        if attack_roll < ac and not is_crit:
             return 0
 
         damage = 0
         for dice in range(d8s):
             damage += randint(1, 8)
-
-        if self.is_crit(roll):
-            for dice in range(d8s):
+            if is_crit:
                 damage += randint(1, 8)
 
         damage += self.stat_bonus
-
-        if self.options.get("curse", False):
-            damage += self.proficiency
-
-        if self.options.get("hexed", False):
-            if self.is_crit(roll):
-                damage += self.hexed_damage(crit=True)
-            else:
-                damage += self.hexed_damage()
+        damage += self.additional_damage_on_hit(crit=is_crit)
 
         return damage
 
 
 def attack(
-        level, ac, hexed=False, darkness=False, cursed=False, spiritual_weapon=False
+        level, ac, hexed=False, darkness=False, cursed=False, spiritual_weapon=False, bestow_curse=False,
+        foresight=False
 ):
     hexblade = Hexblade(level)
     if cursed:
         hexblade.hex_curse()
-    if darkness:
-        hexblade.advantage = 2
     if hexed:
         hexblade.hexed()
+    if bestow_curse:
+        hexblade.bestow_curse()
+    if darkness or foresight:
+        hexblade.advantage = 2
 
     damage = 0
     for attack_round in range(100_000):
+        damage += hexblade.eldritch_blast(ac)
         if spiritual_weapon:
             damage += hexblade.spiritual_weapon(ac)
-        if hexed:
-            damage += hexblade.eldritch_blast(ac)
-        else:
-            damage += hexblade.eldritch_blast(ac)
     return damage / 100_000
 
 
 def run_trials():
     levels = [3, 5, 9, 13, 17]
-    ac = 20
+    ac = 14
 
     for level in levels:
         print(f"level: {level}")
@@ -203,14 +213,25 @@ def run_trials():
         damage = attack(level, ac, darkness=True, cursed=True, spiritual_weapon=True)
         print(f"\tdarkness, hexblade's curse, spiritual weapon: {damage}")
 
+        if level >= 9:
+            print("")
+            damage = attack(level, ac, hexed=True, cursed=True, bestow_curse=True)
+            print(f"\thexed, hexblade's curse, bestow curse: {damage}")
+
+            damage = attack(level, ac, darkness=True, cursed=True, bestow_curse=True)
+            print(f"\tdarkness, hexblade's curse, bestow curse: {damage}")
+
         if level >= 17:
             print("")
 
-            damage = attack(level, ac, darkness=True, hexed=True)
+            damage = attack(level, ac, foresight=True, hexed=True)
             print(f"\thex, foresight: {damage}")
 
-            damage = attack(level, ac, darkness=True, hexed=True, cursed=True)
+            damage = attack(level, ac, foresight=True, hexed=True, cursed=True)
             print(f"\thex, foresight, hexblade's curse: {damage}")
+
+            damage = attack(level, ac, foresight=True, hexed=True, cursed=True, bestow_curse=True)
+            print(f"\thex, foresight, hexblade's curse, bestow curse: {damage}")
 
         print("")
 
